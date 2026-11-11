@@ -1,0 +1,6 @@
+# Never upload secrets or local state; env vars are set in the Vercel project instead.
+.env*
+!.env.local.example
+.data
+.next
+node_modules

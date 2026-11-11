@@ -12,8 +12,9 @@ const KEY = "kam:db";
 const seed = seedJson as unknown as DB;
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x));
 
-const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
-const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+// Upstash's own names, or the KV_* names the Vercel Marketplace integration sets.
+const upstashUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 const useUpstash = Boolean(upstashUrl && upstashToken);
 
 const filePath = process.env.VERCEL

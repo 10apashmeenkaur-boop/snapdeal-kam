@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Snapdeal Virtual KAM
 
-## Getting Started
+**Asha** is an AI key account manager that talks to a seller whose sales dropped, finds the cause in their data, asks only what the data can't tell her, and then *does* the fixes during the call: pauses listings, sets alerts, creates restock plans and deals, and books a follow-up. The dashboard changes live as she works.
 
-First, run the development server:
+Built for the Snapdeal "AI First Intern" take-home. See [NOTE.md](NOTE.md) for the one-page submission note and [SPEC.md](SPEC.md) for the full build spec.
+
+## Run it locally
+
+Requirements: Node 22+, Chrome, an ElevenLabs account.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.local.example .env.local      # then fill in ELEVENLABS_API_KEY
+npm run agent:sync                    # creates the agent + 13 tools on ElevenLabs, writes NEXT_PUBLIC_AGENT_ID
+npm run dev                           # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open **http://localhost:3000**, click **Reset demo**, then **Talk to Asha as Rohit**.
+Add `?dev=1` to the URL for the dev tool panel, which runs any tool without a voice call (no ElevenLabs minutes).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo script (about 2 minutes)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Sharma Home & Kitchen** (stock-outs). Say: *"My sales have dropped a lot this month."* Asha gives the headline (−₹65,000, −32.5%, mostly 4 bestsellers out of stock), asks why stock ran out, recommends pausing the empty listings and a restock plan, and runs them after you say yes. Watch the rows flash.
+2. Click **Simulate 7 days ⏩** to see the effect of what was done (orders 270 → 310, cancellations 14% → 4.5%).
+3. **Priya Ethnic Wear** (pricing). Ask for a 40% discount: the tool refuses (30% cap / margin floor) and Asha offers the maximum safe discount instead.
+4. **GadgetHub** (slow dispatch). Asha identifies dispatch, not stock, and sets a 24-hour dispatch commitment.
 
-## Learn More
+## Commands
 
-To learn more about Next.js, take a look at the following resources:
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server |
+| `npm test` | Unit tests: analytics numbers, tool guardrails, client-tool wiring |
+| `npm run seed` | Regenerate `data/seed.json` (checks every total reconciles) |
+| `npm run agent:sync` | Push `agent/` (prompt, tools, settings) to ElevenLabs. Safe to re-run |
+| `npm run agent:check` | Read the live agent back and print a ✓/✗ checklist |
+| `npm run agent:voices` | Shortlist Indian English female voices (read-only) |
+| `npm run agent:add-voice -- <id>` | Add a library voice to My Voices and switch Asha to it |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How it fits together
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+Browser (Next.js)                                   ElevenLabs Agents
+ Dashboard ◄─ UI event bus ◄─ client tools ◄──────── speech-to-text → LLM → text-to-speech
+                                   │                  (turn-taking, barge-in)
+                                   ▼
+ /api/tools/<name>  → lib/tools.ts (zod + guardrails) → lib/analytics.ts (all the maths)
+                                                      → lib/store.ts (JSON file / Upstash Redis)
+ /api/get-signed-url → short-lived call credentials (API key stays on the server)
+```
 
-## Deploy on Vercel
+- **The LLM never does maths.** `lib/analytics.ts` computes every number; tools return short, speakable sentences.
+- **Consent is enforced in code.** Every write tool refuses unless `seller_confirmed` is `true`; `create_deal` also enforces a 30% cap and a cost + 5% margin floor.
+- **One source of truth for the agent.** `agent/system-prompt.md`, `agent/tools.json` and `agent/agent.json` are pushed by `npm run agent:sync`; a test fails if the code and `tools.json` disagree.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project layout
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/            page + API routes (tools, seller state, demo controls, call credentials)
+components/     Console, Dashboard, SkuTable, DiagnosisCard, ActionTimeline, CallPanel, VoiceCall, ToolFeed, DevToolPanel
+lib/            types, analytics, tools, store, state, uiBus, agentClientTools, formatting
+agent/          system prompt, tool definitions, agent settings
+data/seed.json  three sellers with different root causes (generated by scripts/generate-seed.mjs)
+scripts/        seed generator, ElevenLabs sync
+tests/          vitest suites
+```
+
+## Deploying (Vercel)
+
+Set `ELEVENLABS_API_KEY` and `NEXT_PUBLIC_AGENT_ID` in the Vercel project. Add **Upstash Redis** from the Vercel Marketplace (it sets `KV_REST_API_URL` / `KV_REST_API_TOKEN`; `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` also work); without it, serverless instances don't share state and the dashboard may miss Asha's changes. Click **Reset demo** before each demo.
