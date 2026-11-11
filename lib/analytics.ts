@@ -13,6 +13,7 @@ import type {
   SellerId,
   Sku,
 } from "./types";
+import { inr } from "./format";
 
 export const round1 = (n: number) => Math.round(n * 10) / 10;
 const pct = (part: number, whole: number) => (whole === 0 ? 0 : round1((part / whole) * 100));
@@ -154,12 +155,12 @@ export function diagnose(db: DB, sellerId: SellerId): Diagnosis {
         .filter((s) => competitorGapPct(s) > 5 && s.competitorPrice! < s.priceLast)
         .sort((a, b) => b.ordersLast - a.ordersLast);
       const evidence = [
-        `Average selling price up ${headline.aspChangePct}% (₹${last.asp} to ₹${now.asp}) while orders fell ${pct(orderDrop, last.orders)}%`,
+        `Average selling price up ${headline.aspChangePct}% (${last.asp} to ${now.asp} rupees) while orders fell ${pct(orderDrop, last.orders)}%`,
         `${hit.length} products had price rises over 10% or sit above competitor prices`,
       ];
       undercut.slice(0, 3).forEach((s) =>
         evidence.push(
-          `${s.sku} ${s.name}: you ₹${s.price}, competitor ₹${s.competitorPrice} (${round1(competitorGapPct(s))}% higher); orders ${s.ordersLast} to ${s.ordersThis}`,
+          `${s.name} ${s.sku}: your price ${s.price}, competitor ${s.competitorPrice} rupees (${round1(competitorGapPct(s))}% higher); orders ${s.ordersLast} to ${s.ordersThis}`,
         ),
       );
       hit.forEach((s) => attributed.add(s.sku));
@@ -235,7 +236,7 @@ export function diagnose(db: DB, sellerId: SellerId): Diagnosis {
           .slice(0, 2)
           .map(([k, n]) => `${k.replace(/_/g, " ")} ${n} of ${totalCancels}`)
           .join(", ")}`,
-        `Revenue kept after cancellations ₹${realisedLast} to ₹${realisedNow} (${headline.realisedRevenueDropPct}% down)`,
+        `Revenue kept after cancellations ${inr(realisedLast)} to ${inr(realisedNow)} (${headline.realisedRevenueDropPct}% down)`,
       ],
       unknowns: UNKNOWNS.cancellations,
     });
@@ -277,14 +278,15 @@ export function diagnose(db: DB, sellerId: SellerId): Diagnosis {
 export function simulateWeek(db: DB, sellerId: SellerId): { db: DB; week: MonthMetrics } {
   const base = mustMetrics(db, sellerId, "this");
   const seller = db.sellers.find((s) => s.id === sellerId);
-  const executed = db.actions.filter((a) => a.sellerId === sellerId && a.status === "executed");
-  const skusIn = (type: string) =>
-    new Set(
-      executed
-        .filter((a) => a.type === type)
-        .flatMap((a) => ((a.payload.skus as string[] | undefined) ?? [])),
-    );
-  const restocked = skusIn("create_restock_plan");
+  // Seller-owned restock plans start as "proposed"; the simulated week assumes
+  // the seller followed through, so they count unless they failed.
+  const restockPlans = db.actions.filter(
+    (a) => a.sellerId === sellerId && a.type === "create_restock_plan" && a.status !== "failed",
+  );
+  const restocked = new Set(restockPlans.flatMap((a) => (a.payload.skus as string[] | undefined) ?? []));
+  const actions = db.actions.map((a) =>
+    restockPlans.includes(a) ? { ...a, status: "executed" as const } : a,
+  );
   const deals = db.deals.filter((d) => d.sellerId === sellerId);
   const slaDays = seller?.dispatchSlaHours ? seller.dispatchSlaHours / 24 : undefined;
 
@@ -359,7 +361,7 @@ export function simulateWeek(db: DB, sellerId: SellerId): { db: DB; week: MonthM
 
   const metrics = db.metrics.filter((m) => !(m.sellerId === sellerId && m.month === "week+1"));
   metrics.push(week);
-  return { db: { ...db, skus, metrics }, week };
+  return { db: { ...db, skus, metrics, actions }, week };
 }
 
 // ---------------------------------------------------------------- health
