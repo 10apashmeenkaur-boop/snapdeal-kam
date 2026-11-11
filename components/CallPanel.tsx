@@ -3,6 +3,7 @@
 // Centre column: the live call. Orb (driven by call status), start/end, transcript, tool feed.
 // Presentational: the voice wiring passes status, transcript and handlers in.
 
+import { useEffect, useRef } from "react";
 import type { TranscriptLine } from "@/lib/types";
 import ToolFeed from "./ToolFeed";
 
@@ -33,6 +34,10 @@ export default function CallPanel({
   resetKey: string;
 }) {
   const live = status !== "idle";
+  const lastLine = useRef<HTMLLIElement>(null);
+  useEffect(() => {
+    lastLine.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [transcript.length]);
   return (
     <aside className="flex flex-col gap-5 rounded-xl bg-plum p-5 text-white lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
       <div className="flex flex-col items-center gap-3 pt-2 text-center">
@@ -75,7 +80,7 @@ export default function CallPanel({
         ) : (
           <ol className="mt-2 space-y-2 text-[14px]" aria-live="polite">
             {transcript.map((t, i) => (
-              <li key={i} className={t.role === "agent" ? "pr-6" : "pl-6 text-right"}>
+              <li key={i} ref={i === transcript.length - 1 ? lastLine : undefined} className={t.role === "agent" ? "pr-6" : "pl-6 text-right"}>
                 <span className={`inline-block rounded-lg px-3 py-1.5 ${t.role === "agent" ? "bg-plum-2" : "bg-white/10"}`}>
                   {t.text}
                 </span>

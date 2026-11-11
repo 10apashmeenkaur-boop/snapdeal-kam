@@ -59,7 +59,10 @@ async function persist(db: DB): Promise<void> {
   cache = db;
   try {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.writeFile(filePath, JSON.stringify(db));
+    // Write-then-rename so a reader never sees a half-written file.
+    const tmp = `${filePath}.${process.pid}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(db));
+    await fs.rename(tmp, filePath);
   } catch {
     // Read-only filesystem: keep the in-memory copy.
   }

@@ -5,11 +5,11 @@
 import { useEffect, useState } from "react";
 import type { HealthCheck } from "@/lib/types";
 import ActionTimeline, { PastCalls } from "./ActionTimeline";
-import CallPanel from "./CallPanel";
 import Dashboard from "./Dashboard";
 import DevToolPanel from "./DevToolPanel";
 import DiagnosisCard from "./DiagnosisCard";
 import { useSellerState } from "./useSellerState";
+import VoiceCall from "./VoiceCall";
 
 const SELLERS = [
   { id: "S1", short: "Sharma Home & Kitchen" },
@@ -127,7 +127,13 @@ export default function Console({ dev }: { dev: boolean }) {
             <Dashboard state={state} changed={changed} />
           </div>
           <div className="order-1 lg:order-2 lg:row-span-2 xl:row-span-1">
-            <CallPanel sellerName={state.seller.name} status="idle" transcript={[]} resetKey={resetKey + sellerId} />
+            <VoiceCall
+              key={sellerId}
+              sellerId={sellerId}
+              sellerName={state.seller.name}
+              resetKey={resetKey}
+              onCallEnd={() => refresh()}
+            />
           </div>
           <div className="order-3 flex min-w-0 flex-col gap-4">
             <DiagnosisCard d={state.diagnosis} />
