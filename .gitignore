@@ -43,3 +43,6 @@ next-env.d.ts
 # local state + env example
 .data/
 !.env.local.example
+.vercel
+.env*
+!.env.local.example

@@ -2,6 +2,8 @@
 
 **Asha** is an AI key account manager that talks to a seller whose sales dropped, finds the cause in their data, asks only what the data can't tell her, and then *does* the fixes during the call: pauses listings, sets alerts, creates restock plans and deals, and books a follow-up. The dashboard changes live as she works.
 
+**Live demo:** https://snapdeal-kam-chi.vercel.app (Chrome recommended; click **Reset demo** first).
+
 Built for the Snapdeal "AI First Intern" take-home. See [NOTE.md](NOTE.md) for the one-page submission note and [SPEC.md](SPEC.md) for the full build spec.
 
 ## Run it locally
