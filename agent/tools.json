@@ -1,0 +1,263 @@
+{
+  "_note": "Source of truth for the ElevenLabs agent's client tools. Create each one in the dashboard as type 'Client', with exactly this name, description and parameters, and 'Wait for response' ON. Also enable the built-in system tool end_call.",
+  "tools": [
+    {
+      "type": "client",
+      "name": "get_seller_snapshot",
+      "description": "Get the seller's key metrics for last month vs this month: sales, orders, cancellation rate, average selling price, out-of-stock count.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" }
+        },
+        "required": ["seller_id"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "get_diagnosis",
+      "description": "Get the ranked root causes of the seller's sales drop with quantified impact (orders and rupees), evidence, and unknowns: questions only the seller can answer. Call at the start of every call.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" }
+        },
+        "required": ["seller_id"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "get_sku_details",
+      "description": "List up to 5 of the seller's products matching a filter, with stock, status, price, search rank and orders.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "filter": {
+            "type": "string",
+            "description": "Which products to list",
+            "enum": ["out_of_stock", "top_sellers", "low_rank"]
+          }
+        },
+        "required": ["seller_id", "filter"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "get_cancellation_breakdown",
+      "description": "Get this month's cancelled orders counted by reason, compared with last month.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" }
+        },
+        "required": ["seller_id"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "get_account_history",
+      "description": "Get the last call summary, the actions agreed and their status, and follow-up targets versus current numbers. Call at the start of every call.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" }
+        },
+        "required": ["seller_id"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "mark_listings_unavailable",
+      "description": "Mark out-of-stock listings unavailable so new orders stop coming in and getting cancelled. Only call after the seller clearly says yes.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "skus": {
+            "type": "array",
+            "description": "SKU codes to mark unavailable, e.g. HK-112",
+            "items": { "type": "string", "description": "A SKU code" }
+          },
+          "seller_confirmed": {
+            "type": "boolean",
+            "description": "True only if the seller explicitly agreed to this action in this call"
+          }
+        },
+        "required": ["seller_id", "skus", "seller_confirmed"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "set_low_stock_alert",
+      "description": "Create low-stock alerts that warn the seller when a product has fewer than threshold_days of stock left. Only call after the seller clearly says yes.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "skus": {
+            "type": "array",
+            "description": "SKU codes to watch",
+            "items": { "type": "string", "description": "A SKU code" }
+          },
+          "threshold_days": {
+            "type": "integer",
+            "description": "Alert when stock covers fewer than this many days of sales (3 to 30)"
+          },
+          "seller_confirmed": {
+            "type": "boolean",
+            "description": "True only if the seller explicitly agreed to this action in this call"
+          }
+        },
+        "required": ["seller_id", "skus", "threshold_days", "seller_confirmed"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "create_restock_plan",
+      "description": "Create a restock task for the seller (owner: seller, due in 3 days), prioritised by lost orders. Only call after the seller clearly says yes.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "skus": {
+            "type": "array",
+            "description": "SKU codes to restock",
+            "items": { "type": "string", "description": "A SKU code" }
+          },
+          "seller_confirmed": {
+            "type": "boolean",
+            "description": "True only if the seller explicitly agreed to this action in this call"
+          }
+        },
+        "required": ["seller_id", "skus", "seller_confirmed"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "create_deal",
+      "description": "Create a time-limited discount on one product. Rejected if the discount is over 30 percent or breaks the seller's margin; the response then gives the maximum allowed discount. Only call after the seller clearly says yes.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S2" },
+          "sku": { "type": "string", "description": "The SKU code to discount" },
+          "discount_pct": { "type": "number", "description": "Discount in percent, e.g. 15" },
+          "days": { "type": "integer", "description": "How many days the deal runs (1 to 30)" },
+          "start": {
+            "type": "string",
+            "description": "Start now, or automatically once the product is back in stock",
+            "enum": ["now", "after_restock"]
+          },
+          "seller_confirmed": {
+            "type": "boolean",
+            "description": "True only if the seller explicitly agreed to this action in this call"
+          }
+        },
+        "required": ["seller_id", "sku", "discount_pct", "days", "start", "seller_confirmed"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "update_dispatch_sla",
+      "description": "Set the seller's committed dispatch time in hours (24 to 72). Only call after the seller clearly says yes.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S3" },
+          "target_hours": { "type": "integer", "description": "Dispatch within this many hours (24 to 72)" },
+          "seller_confirmed": {
+            "type": "boolean",
+            "description": "True only if the seller explicitly agreed to this action in this call"
+          }
+        },
+        "required": ["seller_id", "target_hours", "seller_confirmed"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "schedule_followup",
+      "description": "Schedule a follow-up call with measurable targets. Does not need seller confirmation.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "in_days": { "type": "integer", "description": "Days from now, usually 7" },
+          "targets": {
+            "type": "array",
+            "description": "Measurable targets, e.g. 'cancellation rate below 9 percent'",
+            "items": { "type": "string", "description": "One target" }
+          }
+        },
+        "required": ["seller_id", "in_days", "targets"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "escalate_to_human_kam",
+      "description": "Escalate to a human key account manager, who will call the seller within 24 hours. Use if the seller is upset, asks for refunds, compensation or policy exceptions, or the issue is outside your data.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "reason": { "type": "string", "description": "One-line reason for the escalation" }
+        },
+        "required": ["seller_id", "reason"]
+      }
+    },
+    {
+      "type": "client",
+      "name": "save_call_summary",
+      "description": "Save the call summary to the seller's account. Must be called before ending every call.",
+      "expects_response": true,
+      "response_timeout_secs": 15,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "seller_id": { "type": "string", "description": "The seller id, e.g. S1" },
+          "key_issues": {
+            "type": "array",
+            "description": "Main problems identified",
+            "items": { "type": "string", "description": "One issue" }
+          },
+          "actions_agreed": {
+            "type": "array",
+            "description": "Actions agreed or executed in this call",
+            "items": { "type": "string", "description": "One action" }
+          },
+          "next_steps": {
+            "type": "array",
+            "description": "What happens next and who owns it",
+            "items": { "type": "string", "description": "One next step" }
+          },
+          "follow_up": { "type": "string", "description": "When the follow-up is, e.g. 'in 7 days'" }
+        },
+        "required": ["seller_id", "key_issues", "actions_agreed", "next_steps", "follow_up"]
+      }
+    }
+  ]
+}
