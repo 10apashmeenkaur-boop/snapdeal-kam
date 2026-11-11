@@ -1,21 +1,27 @@
 {
-  "_note": "Non-secret agent settings. scripts/sync-agent.ts pushes this + system-prompt.md + tools.json to ElevenLabs.",
+  "_note": "Non-secret agent settings. scripts/sync-agent.mts pushes this + system-prompt.md + tools.json to ElevenLabs.",
   "name": "Asha, Snapdeal Virtual KAM",
   "first_message": "Hello {{seller_name}} ji, this is Asha from Snapdeal seller success. {{call_context}}",
   "language": "en",
-  "additional_languages": ["hi"],
+  "additional_languages": [
+    "hi"
+  ],
   "dynamic_variable_placeholders": {
     "seller_id": "S1",
     "seller_name": "Rohit",
     "call_reason": "inbound",
     "call_context": "How can I help you today?"
   },
-  "llm_preferences": ["gemini-3.5-flash", "gpt-4.1-mini", "gpt-4o-mini"],
+  "llm_preferences": [
+    "gemini-3.5-flash",
+    "gpt-4.1-mini",
+    "gpt-4o-mini"
+  ],
   "temperature": 0.4,
   "tts_model_id": "eleven_flash_v2",
   "_tts_note": "ElevenLabs requires English-default agents to use flash/turbo v2; the Hindi preset runs on v2.5 automatically.",
-  "voice_id": "hpp4J3VqNfWAUOO0d1Us",
-  "_voice_note": "Placeholder: premade 'Bella'. Library voices must be added to My Voices first: npm run agent:add-voice -- <voice_id>",
+  "voice_id": "90ipbRoKi4CpHXvKVtl0",
+  "_voice_note": "Anika - Customer Care Agent. To switch, library voices must be added to My Voices first: npm run agent:add-voice -- <voice_id>",
   "_voice_shortlist": {
     "90ipbRoKi4CpHXvKVtl0": "Anika - Customer Care Agent (Indian English, conversational, en+hi)",
     "EaBs7G1VibMrNAuz2Na7": "Monika Sogam - Natural Conversations (Indian English, conversational, en+hi)",
