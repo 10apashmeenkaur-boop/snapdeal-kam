@@ -77,7 +77,8 @@ const int = (min: number, max: number, unit: string) =>
 // ---------------------------------------------------------------- lookup helpers
 
 const iso = (d: Date) => d.toISOString();
-const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000).toISOString().slice(0, 10);
+// Full timestamp (not a UTC date string) so local display shows the right day in IST.
+const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000).toISOString();
 const newId = (p: string) => `${p}_${Math.random().toString(36).slice(2, 9)}`;
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 

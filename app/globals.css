@@ -1,19 +1,97 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f7f7f8;
-  --foreground: #18181b;
+/* Tokens: cool paper ledger, Snapdeal pink-red accent, plum call column. */
+@theme {
+  --color-paper: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-ink: #16181d;
+  --color-muted: #5f6573;
+  --color-faint: #9aa0ab;
+  --color-rule: #e3e5ea;
+  --color-accent: #e40046;
+  --color-accent-soft: #fde6ee;
+  --color-loss: #c2410c;
+  --color-gain: #0e7c55;
+  --color-plum: #24121f;
+  --color-plum-2: #351b2e;
+  --color-plum-rule: #4a2a41;
+
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* All figures line up in tables and strips. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one motion: a row or item Asha just changed glows pink and fades. */
+@keyframes changed {
+  0% {
+    background-color: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.just-changed {
+  animation: changed 2.4s ease-out;
+}
+
+/* The orb in the call column. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.orb-listening {
+  animation: breathe 2.6s ease-in-out infinite;
+}
+.orb-speaking::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--color-accent);
+  animation: pulse-ring 1.1s ease-out infinite;
+}
+.orb-connecting {
+  animation: breathe 0.9s ease-in-out infinite;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .just-changed,
+  .orb-listening,
+  .orb-connecting,
+  .orb-speaking::after {
+    animation: none;
+  }
 }

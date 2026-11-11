@@ -125,7 +125,8 @@ describe("write tools", () => {
       seller_confirmed: true,
     });
     const a = out.db.actions[0];
-    expect(a).toMatchObject({ owner: "Seller", status: "proposed", due: "2026-11-15" });
+    expect(a).toMatchObject({ owner: "Seller", status: "proposed" });
+    expect(a.due).toMatch(/^2026-11-15/);
     expect(a.payload.skus).toEqual(["HK-112", "HK-087", "HK-145", "HK-063"]);
     expect(out.response.message).toMatch(/88 orders a month/);
   });
