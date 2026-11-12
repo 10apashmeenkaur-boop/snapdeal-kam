@@ -1,5 +1,5 @@
 // Core data model for the Virtual KAM mock backend.
-// Field names follow SPEC.md section 3; a few extra fields (marked "extra")
+// Field names follow the take-home's data model; a few extra fields (marked "extra")
 // carry the last-month values the analytics engine needs to explain a drop.
 
 export type SellerId = string;

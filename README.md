@@ -4,7 +4,7 @@
 
 **Live demo:** https://snapdeal-kam-chi.vercel.app (Chrome recommended; click **Reset demo** first).
 
-Built for the Snapdeal "AI First Intern" take-home. See [NOTE.md](NOTE.md) for the one-page submission note and [SPEC.md](SPEC.md) for the full build spec.
+Built for the Snapdeal "AI First Intern" take-home. See [NOTE.md](NOTE.md) for the one-page submission note.
 
 ## Run it locally
 
