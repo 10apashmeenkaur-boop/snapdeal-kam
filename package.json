@@ -13,7 +13,8 @@
     "agent:check": "node scripts/sync-agent.mts check",
     "agent:voices": "node scripts/sync-agent.mts voices",
     "agent:llms": "node scripts/sync-agent.mts llms",
-    "agent:add-voice": "node scripts/sync-agent.mts add-voice"
+    "agent:add-voice": "node scripts/sync-agent.mts add-voice",
+    "note:pdf": "node scripts/note-pdf.mjs"
   },
   "dependencies": {
     "@elevenlabs/react": "1.21.1",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
+    "marked": "15.0.12",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.7"
