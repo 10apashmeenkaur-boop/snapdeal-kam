@@ -1,5 +1,6 @@
 # Virtual KAM: submission note
-**Pashmeen Kaur · Snapdeal AI First Intern take-home · Live demo: https://snapdeal-kam-chi.vercel.app**
+**Pashmeen Kaur · Snapdeal AI First Intern take-home**
+**Live demo: https://snapdeal-kam-chi.vercel.app · Code: https://github.com/10apashmeenkaur-boop/snapdeal-kam**
 
 ## What it does
 Asha is a voice AI key account manager for a seller whose sales dropped. She doesn't just talk about fixes: she **diagnoses the drop from data, asks only what the data can't tell her, and executes the fixes during the call**, after the seller says yes. The seller dashboard changes live as she works. Every call ends with a saved summary and a 7-day follow-up with measurable targets. For the brief's seller she finds: sales −₹65,000 (−32.5%), all volume since price was flat; 13 products newly out of stock cost about 97 orders (75% of the drop), 4 bestsellers alone 88; cancellations rose 8% → 14%, mostly "no stock". Two more mock sellers have different root causes (pricing vs a competitor, slow dispatch), so the diagnosis is computed, not scripted.
