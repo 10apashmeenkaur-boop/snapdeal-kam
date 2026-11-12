@@ -158,7 +158,7 @@ export default function Console({ dev }: { dev: boolean }) {
       {error && <p className="mb-4 rounded-lg border border-loss/40 bg-loss/5 px-4 py-3 text-sm text-loss">{error}. Check that the dev server is running, then reload.</p>}
 
       {state ? (
-        <main className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1.35fr)_360px_minmax(0,1fr)]">
+        <main className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1.45fr)_340px_minmax(0,1fr)]">
           <div className="order-2 min-w-0 lg:order-1">
             <Dashboard state={state} changed={changed} />
           </div>

@@ -17,7 +17,7 @@ function Status({ s }: { s: Sku }) {
   if (s.stock === 0)
     return (
       <span className="inline-flex items-center gap-1.5 font-medium text-accent" title="Listing is live with no stock, so new orders get cancelled">
-        <span className="size-2 rounded-full bg-accent" />Live, no stock
+        <span className="size-2 rounded-full bg-accent" />No stock
       </span>
     );
   return <span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full bg-gain" />Live</span>;
@@ -71,16 +71,17 @@ export default function SkuTable({ state, changed }: { state: SellerState; chang
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="num w-full min-w-[640px] text-sm">
+      {/* Fits its card at laptop widths; scrolls sideways (visible scrollbar) only when the card is narrower than the table's floor. */}
+      <div className="scroll-x overflow-x-auto">
+        <table className="num w-full min-w-[440px] text-[13px]">
           <thead>
-            <tr className="whitespace-nowrap text-left text-[13px] text-muted">
-              <th className="px-4 py-2 font-medium">Product</th>
-              <th className="px-2 py-2 text-right font-medium">Price</th>
-              <th className="px-2 py-2 text-right font-medium">Stock</th>
-              <th className="px-2 py-2 font-medium">Status</th>
-              <th className="px-2 py-2 text-right font-medium">Search rank</th>
-              <th className="px-4 py-2 text-right font-medium">Orders, last → this</th>
+            <tr className="text-left text-[12px] leading-tight text-muted">
+              <th className="py-2 pr-1.5 pl-3 font-medium">Product</th>
+              <th className="px-1.5 py-2 text-right font-medium">Price</th>
+              <th className="px-1.5 py-2 text-right font-medium">Stock</th>
+              <th className="px-1.5 py-2 font-medium">Status</th>
+              <th className="px-1.5 py-2 text-right font-medium" title="Search rank (change since last month)">Rank</th>
+              <th className="w-[5.5rem] py-2 pr-3 pl-1.5 text-right font-medium">Orders (last → this)</th>
             </tr>
           </thead>
           <tbody>
@@ -90,35 +91,35 @@ export default function SkuTable({ state, changed }: { state: SellerState; chang
               const priced = s.price !== s.priceLast;
               return (
                 <tr key={s.sku} className={`border-t border-rule ${changed.skus.has(s.sku) ? "just-changed" : ""}`}>
-                  <td className="px-4 py-2">
-                    <div className="font-medium">{s.name}</div>
-                    <div className="flex flex-wrap items-center gap-x-2 text-[12px] text-muted">
+                  <td className="py-2 pr-1.5 pl-3">
+                    <div className="font-medium leading-snug">{s.name}</div>
+                    <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-muted">
                       <span className="font-mono">{s.sku}</span>
                       {alerted.has(s.sku) && <span title="Low-stock alert set">🔔 alert</span>}
                       {deal && <span className="font-medium text-accent">{deal.discountPct}% deal</span>}
                     </div>
                   </td>
-                  <td className="px-2 py-2 text-right">
+                  <td className="whitespace-nowrap px-1.5 py-2 text-right">
                     <div>{rupee(s.price)}</div>
-                    {priced && <div className="text-[12px] text-loss">was {rupee(s.priceLast)}</div>}
+                    {priced && <div className="text-[11px] text-loss">was {rupee(s.priceLast)}</div>}
                     {s.competitorPrice !== undefined && s.competitorPrice < s.price && (
-                      <div className="text-[12px] text-muted">rival {rupee(s.competitorPrice)}</div>
+                      <div className="text-[11px] text-muted">rival {rupee(s.competitorPrice)}</div>
                     )}
                   </td>
-                  <td className="px-2 py-2 text-right">
+                  <td className="px-1.5 py-2 text-right">
                     <div className={s.stock === 0 ? "font-medium text-accent" : ""}>{s.stock}</div>
-                    {isLow(s) && <div className="text-[12px] text-loss">{Math.max(1, Math.floor(daysLeft(s)))} days left</div>}
+                    {isLow(s) && <div className="whitespace-nowrap text-[11px] text-loss">{Math.max(1, Math.floor(daysLeft(s)))}d left</div>}
                   </td>
-                  <td className="whitespace-nowrap px-2 py-2"><Status s={s} /></td>
-                  <td className="px-2 py-2 text-right">
+                  <td className="whitespace-nowrap px-1.5 py-2"><Status s={s} /></td>
+                  <td className="whitespace-nowrap px-1.5 py-2 text-right">
                     {s.searchRank}
                     {rankSlip !== 0 && (
-                      <span className={`ml-1 text-[12px] ${rankSlip > 0 ? "text-loss" : "text-gain"}`}>
+                      <span className={`ml-1 text-[11px] ${rankSlip > 0 ? "text-loss" : "text-gain"}`}>
                         {rankSlip > 0 ? `↓${rankSlip}` : `↑${-rankSlip}`}
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="whitespace-nowrap py-2 pr-3 pl-1.5 text-right">
                     <span className="text-faint">{s.ordersLast}</span> → <span className="font-medium">{s.ordersThis}</span>
                   </td>
                 </tr>
