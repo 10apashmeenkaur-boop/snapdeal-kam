@@ -5,6 +5,8 @@
 ## What it does
 Asha is a voice AI key account manager for a seller whose sales dropped. She doesn't just talk about fixes: she **diagnoses the drop from data, asks only what the data can't tell her, and executes the fixes during the call**, after the seller says yes. The seller dashboard changes live as she works. Every call ends with a saved summary and a 7-day follow-up with measurable targets. For the brief's seller she finds: sales −₹65,000 (−32.5%), all volume since price was flat; 13 products newly out of stock cost about 97 orders (75% of the drop), 4 bestsellers alone 88; cancellations rose 8% → 14%, mostly "no stock". Two more mock sellers have different root causes (pricing vs a competitor, slow dispatch), so the diagnosis is computed, not scripted.
 
+**Memory and initiative.** Every call saves a summary, the agreed actions and follow-up targets. **Simulate 7 days** applies only what was actually done (S1: orders 270 → 310, cancellations 14% → 4.5%), then Asha **calls back for the follow-up** and opens by reviewing last week's actions against the new numbers. **Run health check** scans for anomalies, and Asha **calls the seller first** ("4 of your bestsellers are out of stock and still live…"), leading with the reason and asking permission.
+
 ## Architecture
 - **ElevenLabs Agents** runs the voice loop: speech-to-text, LLM, text-to-speech, turn-taking and barge-in. Connects over WebRTC, with a WebSocket fallback.
 - **Client tools.** The agent's 13 tools run in the browser: 5 read, 8 write. Each calls the app's API and flashes the change on the dashboard. No public webhook needed.
@@ -23,7 +25,6 @@ Seller says *"Haan, pause kar do"* → ASR → Gemini decides `mark_listings_una
 Seller profiles, SKU data, cancellation reasons, competitor prices, sellers S2/S3 and the "Simulate 7 days" effects are mock. Orders = orders placed; Sales = Orders × ASP (matches the brief). Actions change a mock backend; in production they'd call Snapdeal seller-panel APIs.
 
 ## What I'd build next
-- **Follow-up memory:** the 7-day call opens by reviewing last week's agreed actions against new numbers. The call logs, `get_account_history` and the week simulation already exist.
-- **Proactive calls:** the anomaly health check (e.g. "4 bestsellers just went out of stock") triggers Asha to call the seller first.
-- Real phone calls via Exotel/Twilio, real seller-panel APIs, more Indian languages, a human-KAM handoff queue.
+- Real phone calls via Exotel/Twilio, with the health check running on a schedule so proactive calls go out automatically; follow-ups dialled on their due date.
+- Real seller-panel APIs and real week-on-week data instead of the simulation; more Indian languages; a human-KAM handoff queue.
 - Call evaluation (did the seller act, how much sales recovered), per-call cost tracking, DPDP-compliant recording consent.

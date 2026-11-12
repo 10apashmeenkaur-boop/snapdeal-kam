@@ -24,6 +24,7 @@ interface Props {
   resetKey: string;
   request?: CallRequest | null;
   onCallEnd?: () => void;
+  onLiveChange?: (live: boolean) => void;
 }
 
 export default function VoiceCall(props: Props) {
@@ -36,7 +37,7 @@ export default function VoiceCall(props: Props) {
 
 const INBOUND_CONTEXT = "How can I help you today?";
 
-function VoiceCallInner({ sellerId, sellerName, resetKey, request, onCallEnd }: Props) {
+function VoiceCallInner({ sellerId, sellerName, resetKey, request, onCallEnd, onLiveChange }: Props) {
   const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
@@ -171,6 +172,12 @@ function VoiceCallInner({ sellerId, sellerName, resetKey, request, onCallEnd }: 
       : conversation.status === "connecting" || (preparing && conversation.status !== "error")
         ? "connecting"
         : "idle";
+
+  // Let the page know when a call is live (so it never pops an incoming call over one).
+  const live = status !== "idle";
+  useEffect(() => {
+    onLiveChange?.(live);
+  }, [live, onLiveChange]);
 
   // Once connected, the SDK owns the status; drop our local "preparing" flag.
   useEffect(() => {

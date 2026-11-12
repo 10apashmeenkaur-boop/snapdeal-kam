@@ -2,14 +2,16 @@
 
 // Page shell: header (seller switcher + demo controls) and the three columns.
 
-import { useEffect, useState } from "react";
-import type { HealthCheck } from "@/lib/types";
+import { useCallback, useEffect, useState } from "react";
+import { followupContext } from "@/lib/callContext";
+import type { HealthCheck, MonthMetrics } from "@/lib/types";
 import ActionTimeline, { PastCalls } from "./ActionTimeline";
 import Dashboard from "./Dashboard";
 import DevToolPanel from "./DevToolPanel";
 import DiagnosisCard from "./DiagnosisCard";
+import IncomingCallModal, { type IncomingCall } from "./IncomingCallModal";
 import { useSellerState } from "./useSellerState";
-import VoiceCall from "./VoiceCall";
+import VoiceCall, { type CallRequest } from "./VoiceCall";
 
 const SELLERS = [
   { id: "S1", short: "Sharma Home & Kitchen" },
@@ -23,6 +25,17 @@ export default function Console({ dev }: { dev: boolean }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthCheck | null>(null);
   const [resetKey, setResetKey] = useState("0");
+  const [incoming, setIncoming] = useState<IncomingCall | null>(null);
+  const [callRequest, setCallRequest] = useState<CallRequest | null>(null);
+  const [inCall, setInCall] = useState(false);
+  const onLiveChange = useCallback((live: boolean) => setInCall(live), []);
+
+  const acceptIncoming = () => {
+    if (!incoming) return;
+    setCallRequest({ id: Date.now(), reason: incoming.reason, context: incoming.context });
+    setIncoming(null);
+    setHealth(null);
+  };
 
   // Remember the last seller per viewer (a convenience only).
   useEffect(() => {
@@ -34,6 +47,8 @@ export default function Console({ dev }: { dev: boolean }) {
   const choose = (id: string) => {
     setSellerId(id);
     setHealth(null);
+    setIncoming(null);
+    setCallRequest(null); // a fresh VoiceCall must not replay the last seller's call request
     try {
       localStorage.setItem("kam:seller", id);
     } catch {}
@@ -47,9 +62,30 @@ export default function Console({ dev }: { dev: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sellerId }),
       }).then((r) => r.json());
-      if (path === "health-check") setHealth(res as HealthCheck);
+      if (path === "health-check") {
+        const h = res as HealthCheck;
+        setHealth(h);
+        // Something worth a call: Asha rings the seller (unless already on a call).
+        if (h.callContext && h.anomalies.length && !inCall)
+          setIncoming({
+            reason: "proactive",
+            headline: h.anomalies[0].message.replace(/^./, (c) => c.toUpperCase()) + ".",
+            context: h.callContext,
+            details: h.anomalies.slice(1).map((a) => a.message),
+          });
+      }
+      if (path === "simulate-week" && res.ok && state && !inCall) {
+        const before = state.metrics.this as MonthMetrics;
+        const after = res.week as MonthMetrics;
+        setIncoming({
+          reason: "followup",
+          headline: `A week on: orders ${before.orders} → ${after.orders} a month, cancellations ${before.cancelRate}% → ${after.cancelRate}%. Asha wants to review last week's actions with you.`,
+          context: followupContext(before, after),
+        });
+      }
       if (path === "reset") {
         setHealth(null);
+        setIncoming(null);
         setResetKey(String(Date.now()));
       }
       await refresh();
@@ -132,7 +168,9 @@ export default function Console({ dev }: { dev: boolean }) {
               sellerId={sellerId}
               sellerName={state.seller.name}
               resetKey={resetKey}
+              request={callRequest}
               onCallEnd={() => refresh()}
+              onLiveChange={onLiveChange}
             />
           </div>
           <div className="order-3 flex min-w-0 flex-col gap-4">
@@ -143,6 +181,15 @@ export default function Console({ dev }: { dev: boolean }) {
         </main>
       ) : (
         !error && <p className="py-20 text-center text-muted">Loading seller data…</p>
+      )}
+
+      {incoming && state && (
+        <IncomingCallModal
+          call={incoming}
+          sellerName={state.seller.name}
+          onAccept={acceptIncoming}
+          onDecline={() => setIncoming(null)}
+        />
       )}
 
       {dev && (

@@ -23,9 +23,10 @@ Add `?dev=1` to the URL for the dev tool panel, which runs any tool without a vo
 ## Demo script (about 2 minutes)
 
 1. **Sharma Home & Kitchen** (stock-outs). Say: *"My sales have dropped a lot this month."* Asha gives the headline (−₹65,000, −32.5%, mostly 4 bestsellers out of stock), asks why stock ran out, recommends pausing the empty listings and a restock plan, and runs them after you say yes. Watch the rows flash.
-2. Click **Simulate 7 days ⏩** to see the effect of what was done (orders 270 → 310, cancellations 14% → 4.5%).
-3. **Priya Ethnic Wear** (pricing). Ask for a 40% discount: the tool refuses (30% cap / margin floor) and Asha offers the maximum safe discount instead.
-4. **GadgetHub** (slow dispatch). Asha identifies dispatch, not stock, and sets a 24-hour dispatch commitment.
+2. Click **Simulate 7 days ⏩** to see the effect of what was done (orders 270 → 310, cancellations 14% → 4.5%). Asha then **calls back**: accept, and she opens the follow-up by reviewing last week's actions against the new numbers.
+3. **Reset demo**, then **Run health check 🔔**: Asha calls *you* about the anomaly ("4 of your bestsellers are out of stock and still live…").
+4. **Priya Ethnic Wear** (pricing). Ask for a 40% discount: the tool refuses (30% cap / margin floor) and Asha offers the maximum safe discount instead.
+5. **GadgetHub** (slow dispatch). Asha identifies dispatch, not stock, and sets a 24-hour dispatch commitment.
 
 ## Commands
 
